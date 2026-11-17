@@ -267,6 +267,23 @@ String? resolveWorkspaceLink(String url, {String? baseDir}) {
     target = target.substring(1, target.length - 1).trim();
   }
   if (target.isEmpty || target.startsWith('#') || target.startsWith('?') || target.startsWith('//')) return null;
+  // A remote Windows drive path ('C:\…', 'C:/…') is read as a URI scheme by
+  // Uri.tryParse and then dropped by the scheme check below. Artifact cards
+  // (linkedPaths) and inline images (imageSourceOf) already keep those as
+  // paths; links should resolve them the same way.
+  if (_drive.hasMatch(target)) {
+    final hash = target.indexOf('#');
+    if (hash > 0) target = target.substring(0, hash);
+    try {
+      target = Uri.decodeFull(target);
+    } on ArgumentError {
+      // Keep it as written.
+    } on FormatException {
+      return null;
+    }
+    if (target.isEmpty) return null;
+    return resolveSessionPath(target, cwd: baseDir);
+  }
   final uri = Uri.tryParse(target);
   if (uri == null) return null;
   if (uri.hasScheme) {

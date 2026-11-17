@@ -58,6 +58,10 @@ void main() {
     expect(MarkdownBody.workspaceLinkPath('code/a.js', baseDir: 'docs'), 'docs/code/a.js');
     expect(MarkdownBody.workspaceLinkPath('../a.js', baseDir: 'docs/chapter'), 'docs/chapter/../a.js');
     expect(MarkdownBody.workspaceLinkPath('/root/a.js', baseDir: 'docs'), '/root/a.js');
+    // Remote Windows hosts: a drive letter is a path, not a URI scheme.
+    expect(MarkdownBody.workspaceLinkPath(r'C:\work\a.png'), r'C:\work\a.png');
+    expect(MarkdownBody.workspaceLinkPath('C:/work/a.png'), 'C:/work/a.png');
+    expect(MarkdownBody.workspaceLinkPath('C:/work/a.js#L4'), 'C:/work/a.js');
   });
 
   test('external URL allowlist remains unchanged', () {
